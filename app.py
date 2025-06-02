@@ -3,6 +3,10 @@ import pandas as pd
 from datetime import datetime
 import os
 from io import BytesIO
+import requests
+from graphviz import Digraph
+import base64
+import matplotlib.pyplot as plt
 
 ARQUIVO_EXCEL = "exames.xlsx"
 
@@ -102,3 +106,7 @@ def main():
 if __name__ == "__main__":
     inicializar_planilha()
     main()
+
+
+
+
