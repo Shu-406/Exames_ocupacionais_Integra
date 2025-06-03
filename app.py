@@ -92,7 +92,7 @@ def main():
 
         # Escolha para cabeçalho Agendado ou Realizado
         status_exame = st.radio(
-            "Status do exame no cabeçalho:",
+            "Status do exame:",
             options=["Agendado", "Realizado"],
             index=1,
             horizontal=True
