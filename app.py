@@ -89,55 +89,55 @@ def main():
 
 
     with aba[1]:
+            with aba[1]:
         st.header("Consultar exames por data")
-
-        # Escolha para cabeçalho Agendado ou Realizado
-        status_exame = st.radio(
-            "Status do exame:",
-            options=["Agendado", "Realizado"],
-            index=1,
-            horizontal=True
-        )
-
-        # Escolha o que mostrar na lista
-        mostrar_nome = st.checkbox("Mostrar Nome do Exame", value=True)
-        mostrar_tipo = st.checkbox("Mostrar Tipo de Exame", value=True)
 
         data_consulta = st.date_input("Escolha a data para consulta", key="consulta")
         df = carregar_dados(aba_google)
-        resultados = df[df["Data"] == data_consulta.strftime('%Y-%m-%d')]
+        resultados = df[df["Data"] == data_consulta.strftime('%Y-%m-%d')].copy()
+
+        # Rótulo no cabeçalho ("Agendado", "Realizado", etc.)
+        status = st.selectbox("Tipo de registro:", ["Realizado", "Agendado"])
 
         if not resultados.empty:
-            st.subheader(f"{status_exame} em {data_consulta.strftime('%d/%m/%Y')}")
+            st.subheader(f"Exames {status.lower()}s em {data_consulta.strftime('%d/%m/%Y')}")
 
-            for i, row in resultados.iterrows():
-                col1, col2 = st.columns([6, 1])
-                with col1:
-                    partes = []
-                    if mostrar_nome:
-                        partes.append(f"**{row['Exame']}**")
-                    if mostrar_tipo:
-                        partes.append(f"({row['Tipo de Exame']})")
-                    texto = " ".join(partes)
-                    st.write(f"{texto} - {int(row['Quantidade'])} atendimentos")
+            # Exibir exames por nome, tipo ou ambos
+            modo_exibicao = st.radio("Exibir colunas:", ["Nome", "Tipo", "Nome + Tipo"], horizontal=True)
 
-                with col2:
-                    # Botão pequeno de excluir com label menor
-                    if st.button("❌", key=f"del_{i}", help="Excluir exame", use_container_width=True):
-                        df.drop(index=row.name, inplace=True)
-                        salvar_dados(df.reset_index(drop=True), aba_google)
-                        st.success("Exame excluído.")
-                        st.experimental_rerun()
+            # Ajustar a visualização conforme a opção escolhida
+            colunas_mostrar = []
+            if modo_exibicao == "Nome":
+                colunas_mostrar = ["Exame", "Quantidade"]
+            elif modo_exibicao == "Tipo":
+                colunas_mostrar = ["Tipo de Exame", "Quantidade"]
+            else:
+                colunas_mostrar = ["Tipo de Exame", "Exame", "Quantidade"]
 
+            # Converter quantidade para int (sem casas decimais)
+            resultados["Quantidade"] = resultados["Quantidade"].astype(int)
+
+            # Mostrar a tabela
+            st.dataframe(resultados[colunas_mostrar], use_container_width=True, hide_index=True)
+
+            # Exclusão individual (mais técnica – identificando pelo nome do exame)
             st.divider()
+            st.subheader("🗑️ Gerenciar exclusões")
+            exame_selecionado = st.selectbox("Selecione um exame para excluir", resultados["Exame"].unique())
+            if st.button("Excluir exame selecionado"):
+                df = df[~((df["Data"] == data_consulta.strftime('%Y-%m-%d')) & (df["Exame"] == exame_selecionado))]
+                salvar_dados(df.reset_index(drop=True), aba_google)
+                st.success("Exame excluído com sucesso.")
+                st.rerun()
+
+            # Exclusão em massa
             st.warning("⚠️ Essa ação remove **todos os exames** dessa data!")
             confirmar = st.checkbox("Confirmo que desejo excluir todos os exames deste dia.")
             if st.button("🧹 Limpar todos os exames do dia", disabled=not confirmar):
                 df = df[df["Data"] != data_consulta.strftime('%Y-%m-%d')]
                 salvar_dados(df.reset_index(drop=True), aba_google)
                 st.success("Todos os exames dessa data foram excluídos.")
-                st.experimental_rerun()
-
+                st.rerun()
         else:
             st.info("Nenhum exame encontrado para essa data.")
 
@@ -147,6 +147,7 @@ def main():
         buffer = df.to_csv(index=False).encode("utf-8")
         nome_arquivo = f"exames_{datetime.today().strftime('%Y-%m-%d')}.csv"
         st.download_button("⬇️ Baixar CSV", data=buffer, file_name=nome_arquivo, mime="text/csv")
+
 
 if __name__ == "__main__":
     main()
