@@ -5,14 +5,19 @@ from datetime import datetime
 import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
 import json
-import os
 
 SHEET_ID = "1JJfbT3dUEsQogbS1Sj8P2rOxNFlGU0Cr25gCkKm3FnY"
 SHEET_NAME = "Dados" 
 
+meses_pt = {
+    "January": "Janeiro", "February": "Fevereiro", "March": "Março",
+    "April": "Abril", "May": "Maio", "June": "Junho",
+    "July": "Julho", "August": "Agosto", "September": "Setembro",
+    "October": "Outubro", "November": "Novembro", "December": "Dezembro"
+}
+
 # Carregar credenciais do Google
 def autenticar_gspread():
-    # Carregar credenciais do arquivo JSON (deve ser carregado no Streamlit Cloud também)
     credenciais = json.loads(st.secrets["gcp_service_account"])
     cliente = gspread.service_account_from_dict(credenciais)
     planilha = cliente.open_by_key(SHEET_ID)
@@ -47,10 +52,12 @@ def main():
 
         if st.button("Salvar Exame"):
             if tipo and exame and qtd > 0:
-                mes = data.strftime("%B").capitalize()
+                nome_mes_en = data.strftime("%B")
+                nome_mes_pt = meses_pt[nome_mes_en]
+                
                 novo = pd.DataFrame({
                     "Data": [data.strftime('%Y-%m-%d')],
-                    "Mês": [mes],
+                    "Mês": [nome_mes_pt],
                     "Tipo de Exame": [tipo],
                     "Exame": [exame],
                     "Quantidade": [qtd]
@@ -69,8 +76,11 @@ def main():
         resultados = df[df["Data"] == data_consulta.strftime('%Y-%m-%d')]
 
         if not resultados.empty:
-            st.subheader(f"Exames em {data_consulta.strftime('%d/%m/%Y')}")
-
+            nome_mes_pt = meses_pt[data_consulta.strftime("%B")]
+            data_formatada = data_consulta.strftime('%d/%m/%Y')
+            
+            st.subheader(f"Exames em {data_formatada} ({nome_mes_pt})")
+            
             for i, row in resultados.iterrows():
                 col1, col2 = st.columns([5, 1])
                 with col1:
