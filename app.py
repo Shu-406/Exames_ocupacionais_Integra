@@ -89,7 +89,6 @@ def main():
 
 
     with aba[1]:
-            with aba[1]:
         st.header("Consultar exames por data")
 
         data_consulta = st.date_input("Escolha a data para consulta", key="consulta")
