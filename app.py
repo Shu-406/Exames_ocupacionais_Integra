@@ -1,4 +1,16 @@
 import streamlit as st
+import json
+
+st.title("Teste de secrets")
+
+try:
+    creds = json.loads(st.secrets["gcp_service_account"])
+    st.success("✅ Credenciais carregadas com sucesso!")
+except KeyError as e:
+    st.error(f"Erro: {e}")
+
+
+import streamlit as st
 import pandas as pd
 from datetime import datetime
 import gspread
