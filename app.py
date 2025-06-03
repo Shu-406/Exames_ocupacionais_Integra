@@ -80,7 +80,7 @@ def main():
                         df.drop(index=row.name, inplace=True)
                         salvar_dados(df.reset_index(drop=True), aba_google)
                         st.success("Exame excluído.")
-                        st.experimental_rerun()
+                        st.rerun()
 
             st.divider()
             st.warning("⚠️ Essa ação remove **todos os exames** dessa data!")
@@ -89,7 +89,7 @@ def main():
                 df = df[df["Data"] != data_consulta.strftime('%Y-%m-%d')]
                 salvar_dados(df.reset_index(drop=True), aba_google)
                 st.success("Todos os exames dessa data foram excluídos.")
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.info("Nenhum exame encontrado para essa data.")
 
