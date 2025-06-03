@@ -46,12 +46,12 @@ def main():
 
         data = st.date_input("Data do exame")
 
-        # Listas únicas dos tipos
+        # Listas únicas dos tipos existentes
         tipos_existentes = sorted(df["Tipo de Exame"].dropna().unique().tolist())
 
         # Seleção ou novo tipo
-        tipo_sel = st.selectbox("Tipo de Exame", exames_filtrados + ["Adicionar exame"], index=None)
-        if tipo_sel == "Adicionar exame" or tipo_sel is None:
+        tipo_sel = st.selectbox("Tipo de Exame", tipos_existentes + ["Outro..."], index=None)
+        if tipo_sel == "Outro..." or tipo_sel is None:
             tipo = st.text_input("Digite o novo tipo de exame")
             exames_filtrados = []
         else:
@@ -60,8 +60,8 @@ def main():
             exames_filtrados = sorted(df[df["Tipo de Exame"] == tipo]["Exame"].dropna().unique().tolist())
 
         # Seleção ou novo nome de exame
-        exame_sel = st.selectbox("Nome do Exame", exames_existentes + ["Adicionar exame"], index=None)
-        if exame_sel == "Adicionar exame" or exame_sel is None:
+        exame_sel = st.selectbox("Nome do Exame", exames_filtrados + ["Outro..."], index=None)
+        if exame_sel == "Outro..." or exame_sel is None:
             exame = st.text_input("Digite o novo nome de exame")
         else:
             exame = exame_sel
