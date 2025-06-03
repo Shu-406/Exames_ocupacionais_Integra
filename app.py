@@ -47,16 +47,18 @@ def main():
 
         data = st.date_input("Data do exame")
 
-        # Listas únicas dos tipos e nomes de exames existentes
+        # Listas únicas dos tipos
         tipos_existentes = sorted(df["Tipo de Exame"].dropna().unique().tolist())
-        exames_existentes = sorted(df["Exame"].dropna().unique().tolist())
 
-        # Seleção ou novo tipo de exame
+        # Seleção ou novo tipo
         tipo_sel = st.selectbox("Tipo de Exame", tipos_existentes + ["Adicionar exame"], index=None)
         if tipo_sel == "Adicionar exame" or tipo_sel is None:
             tipo = st.text_input("Digite o novo tipo de exame")
+            exames_filtrados = []
         else:
             tipo = tipo_sel
+            # Filtra os nomes de exame relacionados ao tipo selecionado
+            exames_filtrados = sorted(df[df["Tipo de Exame"] == tipo]["Exame"].dropna().unique().tolist())
 
         # Seleção ou novo nome de exame
         exame_sel = st.selectbox("Nome do Exame", exames_existentes + ["Adicionar exame"], index=None)
@@ -89,26 +91,43 @@ def main():
     with aba[1]:
         st.header("Consultar exames por data")
 
+        # Escolha para cabeçalho Agendado ou Realizado
+        status_exame = st.radio(
+            "Status do exame no cabeçalho:",
+            options=["Agendado", "Realizado"],
+            index=1,
+            horizontal=True
+        )
+
+        # Escolha o que mostrar na lista
+        mostrar_nome = st.checkbox("Mostrar Nome do Exame", value=True)
+        mostrar_tipo = st.checkbox("Mostrar Tipo de Exame", value=True)
+
         data_consulta = st.date_input("Escolha a data para consulta", key="consulta")
         df = carregar_dados(aba_google)
         resultados = df[df["Data"] == data_consulta.strftime('%Y-%m-%d')]
 
         if not resultados.empty:
-            nome_mes_pt = meses_pt[data_consulta.strftime("%B")]
-            data_formatada = data_consulta.strftime('%d/%m/%Y')
-            
-            st.subheader(f"Exames em {data_formatada} ({nome_mes_pt})")
-            
+            st.subheader(f"{status_exame} em {data_consulta.strftime('%d/%m/%Y')}")
+
             for i, row in resultados.iterrows():
-                col1, col2 = st.columns([5, 1])
+                col1, col2 = st.columns([6, 1])
                 with col1:
-                    st.write(f"**{row['Exame']}** ({row['Tipo de Exame']}) - {row['Quantidade']} atendimentos")
+                    partes = []
+                    if mostrar_nome:
+                        partes.append(f"**{row['Exame']}**")
+                    if mostrar_tipo:
+                        partes.append(f"({row['Tipo de Exame']})")
+                    texto = " ".join(partes)
+                    st.write(f"{texto} - {int(row['Quantidade'])} atendimentos")
+
                 with col2:
-                    if st.button("🗑️ Excluir", key=f"del_{i}"):
+                    # Botão pequeno de excluir com label menor
+                    if st.button("❌", key=f"del_{i}", help="Excluir exame", use_container_width=True):
                         df.drop(index=row.name, inplace=True)
                         salvar_dados(df.reset_index(drop=True), aba_google)
                         st.success("Exame excluído.")
-                        st.rerun()
+                        st.experimental_rerun()
 
             st.divider()
             st.warning("⚠️ Essa ação remove **todos os exames** dessa data!")
@@ -117,7 +136,8 @@ def main():
                 df = df[df["Data"] != data_consulta.strftime('%Y-%m-%d')]
                 salvar_dados(df.reset_index(drop=True), aba_google)
                 st.success("Todos os exames dessa data foram excluídos.")
-                st.rerun()
+                st.experimental_rerun()
+
         else:
             st.info("Nenhum exame encontrado para essa data.")
 
