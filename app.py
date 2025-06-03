@@ -42,7 +42,7 @@ def main():
     aba_google = autenticar_gspread()
     df = carregar_dados(aba_google)
 
-        with aba[0]:
+    with aba[0]:
         st.header("Adicionar novo exame")
 
         data = st.date_input("Data do exame")
