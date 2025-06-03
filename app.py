@@ -99,10 +99,12 @@ def main():
         status = st.selectbox("Tipo de registro:", ["Realizado", "Agendado"])
 
         if not resultados.empty:
-            st.subheader(f"Exames {status.lower()}s em {data_consulta.strftime('%d/%m/%Y')}")
+            
 
             # Exibir exames por nome, tipo ou ambos
             modo_exibicao = st.radio("Exibir colunas:", ["Nome", "Tipo", "Nome + Tipo"], horizontal=True)
+
+            st.subheader(f"Exames {status.lower()}s em {data_consulta.strftime('%d/%m/%Y')}")
 
             # Ajustar a visualização conforme a opção escolhida
             colunas_mostrar = []
