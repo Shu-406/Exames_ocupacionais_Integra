@@ -52,15 +52,15 @@ def main():
         exames_existentes = sorted(df["Exame"].dropna().unique().tolist())
 
         # Seleção ou novo tipo de exame
-        tipo_sel = st.selectbox("Tipo de Exame", tipos_existentes + ["Outro..."], index=None)
-        if tipo_sel == "Outro..." or tipo_sel is None:
+        tipo_sel = st.selectbox("Tipo de Exame", tipos_existentes + ["Adicionar exame"], index=None)
+        if tipo_sel == "Adicionar exame" or tipo_sel is None:
             tipo = st.text_input("Digite o novo tipo de exame")
         else:
             tipo = tipo_sel
 
         # Seleção ou novo nome de exame
-        exame_sel = st.selectbox("Nome do Exame", exames_existentes + ["Outro..."], index=None)
-        if exame_sel == "Outro..." or exame_sel is None:
+        exame_sel = st.selectbox("Nome do Exame", exames_existentes + ["Adicionar exame"], index=None)
+        if exame_sel == "Adicionar exame" or exame_sel is None:
             exame = st.text_input("Digite o novo nome de exame")
         else:
             exame = exame_sel
